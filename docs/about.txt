@@ -1,0 +1,12 @@
+__________ Welcome to QLNP ______________________________
+
+   QLNP - Quick Launch New Project
+    _____________________________
+
+        ----------------------------------------------------------------------------------------------------------
+        |  The main purpose of this project is to improve the development of programs, sites and more software.  |
+        ----------------------------------------------------------------------------------------------------------
+
+ > version  > {}
+ > branch   > {}
+ > status   > {}
