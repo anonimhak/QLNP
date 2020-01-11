@@ -4,12 +4,10 @@
 
 
 # Import modules
-from os import name as osname, getcwd
-from sys import exit as sexit, argv, path, stdout
-from json import load as j_load
+from os import name as osname, getcwd, listdir
+from sys import exit as sexit, argv
 from subprocess import Popen, PIPE, STDOUT
 
-from yaml import load as y_load
 from colorama import Fore as color
 
 
@@ -24,19 +22,51 @@ __BRANCH__: str = "Develop"
 
 
 
+def errexit(string: str) -> bool:
+    """ Exit for error """
+    print(string)
+    sexit(1)
+
+
+def parse_arguments_from_cl(args: list, mandatory_args: list, values: dict) -> tuple:
+    """ Parse argument from command line """
+    for arg in args:
+        if arg.endswith(".py"):
+            continue
+        elif (arg.startswith("-") or arg.startswith("--")):
+            if (arg == "-h" or arg == "--help"): pass
+            elif (arg == "-a" or arg == "--about"): pass
+            elif (arg == "-v" or arg == "--version"): print(__VERSION__)
+            elif (arg == "-b" or arg == "--branch"): print(__BRANCH)
+            else: errexit("Key '"+arg+"' not found. Input key '--help' for more info")
+        elif len(arg.split("=")) == 2:
+            key, value = arg.split("=")
+            if value == "":
+                mandatory_args.append(key)
+            else:
+                values[key] = value
+        else: errexit("Key '"+key+"' not found")
+        return (values, mandatory_args)
+
+
+
 def main(args: list) -> bool:
+    """ Main function """
     values: dict = {
         "path": ".",
         "name": "NewProject"
     }
     templates_args: dict = {
-        "templates": lambda: for i in listdir("templates/"): print(i),
-        "scripts": lambda: for i in listdir("scripts/"): print(i)
+        "templates": listdir("templates/"),
+        "scripts": listdir("scripts/")
     }
+    mandatory_args: list = ["name", "path"]
+    try: values, mandatory_args = parse_arguments_from_cl(args, mandatory_args, values)
+    except TypeError: pass
     return True
 
 
 
 # If this app == main
 if __name__ == "__main__":
-    main()
+    main(argv)
