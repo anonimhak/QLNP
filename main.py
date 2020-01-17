@@ -8,7 +8,7 @@ from os import name as osname, getcwd, listdir
 from sys import exit as sexit, argv
 from subprocess import Popen, PIPE, STDOUT
 
-from colorama import Fore as color
+from colorama import Fore as colorFont, Back as colorBack
 
 
 
@@ -49,11 +49,12 @@ def parse_arguments_from_cl(args: list, mandatory_args: list, values: dict) -> t
 
 def ask(question: str, answers: list=None) -> str:
     if answers:
+        print(colorFont.YELLOW)
         for answer in answers:
             print("  "+str(answers.index(answer))+".  |  "+answer)
-    value = input(question)
+    value = input(colorFont.BLUE+" "+question+": "+colorFont.RESET)
     if answers:
-        try: value = answers[int(values)]
+        try: value = answers[int(value)]
         except ValueError: pass
     return value
 
@@ -61,6 +62,10 @@ def ask(question: str, answers: list=None) -> str:
 def check_values(values: dict, mandatory_args: list, templates_args: dict) -> dict:
     for key in mandatory_args:
         if not key in values:
+            if key in templates_args:
+                if templates_args[key] == []:
+                    print("Error: not "+key+"!")
+                    continue
             try: values[key] = ask(key, templates_args[key])
             except KeyError: values[key] = ask(key)
     return values
@@ -69,17 +74,25 @@ def check_values(values: dict, mandatory_args: list, templates_args: dict) -> di
 def main(args: list) -> bool:
     """ Main function """
     values: dict = {
-        "path": ".",
+        "path": getcwd(),
         "name": "NewProject"
     }
     templates_args: dict = {
         "templates": listdir("templates/"),
-        "scripts": listdir("scripts/")
+        "scripts": listdir("scripts/"),
+        "license": [i[:-4] for i in listdir("licenses")]
     }
-    mandatory_args: list = ["name", "path"]
+    mandatory_args: list = ["name", "path", "license", "template", "autor", "description"]
     try: values, mandatory_args = parse_arguments_from_cl(args, mandatory_args, values)
     except TypeError: pass
     values = check_values(values, mandatory_args, templates_args)
+    print(colorFont.RED, "-"*100, colorFont.GREEN)
+    for key in values:
+        value = values[key]
+        spaces1 = 20 - len(key) - 3
+        spaces2 = 80 - len(value) - 1 
+        print("| "+key+" "*spaces1+"| "+value+" "*spaces2+"|")
+    print(colorFont.RED, "_"*100, colorFont.RESET)
     return True
 
 
