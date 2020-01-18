@@ -39,12 +39,12 @@ def parse_arguments_from_cl(args: list, mandatory_args: list, values: dict) -> t
             elif (arg == "-a" or arg == "--about"): pass
             elif (arg == "-v" or arg == "--version"): print(__VERSION__)
             elif (arg == "-b" or arg == "--branch"): print(__BRANCH__)
-            else: errexit("Key '"+arg+"' not found. Input key '--help' for more info")
+            else: errexit(True, "Key '{}' not found. Input key '--help' for more info".format(arg))
         elif len(arg.split("=")) == 2:
             key, value = arg.split("=")
             if value == "": mandatory_args.append(key)
             else: values[key] = value
-        else: errexit("Key '"+key+"' not found")
+        else: errexit(True, "Key '{}' not found".format(key))
         return (values, mandatory_args)
 
 
