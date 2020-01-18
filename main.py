@@ -16,16 +16,17 @@ if osname == "nt":
     from colorama import init
     init()
 
-__NAME__: str = "QLNP"
+__NAME__: str = "sproj - start project"
 __VERSION__: str = "0.0.1"
 __BRANCH__: str = "Develop"
 
 
 
-def errexit(string: str) -> bool:
+def errexit(fatal: bool=False, string: str="Fatal error") -> bool:
     """ Exit for error """
-    print(string)
-    sexit(1)
+    print(colorBack.RED+colorFore.GREEN+string)
+    if fatal: sexit(1)
+    print(colorBack.RESET)
 
 
 def parse_arguments_from_cl(args: list, mandatory_args: list, values: dict) -> tuple:
@@ -71,6 +72,45 @@ def check_values(values: dict, mandatory_args: list, templates_args: dict) -> di
     return values
 
 
+def print_values(values: dict) -> bool:
+    """ Print values """
+    print(colorFont.RED, "-"*100, colorFont.GREEN)
+    for key in values:
+        value = values[key]
+        spaces1 = 20 - len(key) - 3
+        spaces2 = 80 - len(value) - 1 
+        print("| "+key+" "*spaces1+"| "+value+" "*spaces2+"|")
+    print(colorFont.RED, "_"*100, colorFont.RESET)
+
+
+def ask_ok(question: str) -> bool:
+    """ Asks the user whether everything is correct """
+    con = input(question+" (y/n): ")
+    if con == "y":
+        return True
+    else:
+        return False
+
+
+def edit_values(values: dict) -> dict:
+    cmd = input(colorBack.YELLOW+colorFont.BLACK+"What is wrong?\nInput add or edit and name key = value. Exsaple 'add pv=3.7' or 'edit nema=Test': "+colorBack.RESET+colorFont.RESET)
+    if cmd.startswith("add"):
+        cmd = cmd[4:]
+        key, value = cmd.split("=")
+        if not key in values: values[key] = value
+        else:
+            if ask_ok("This key '{}' exists.\nDo you want to replace '{}' with '{}'?".format(key, str(values[key]), value)):
+                values[key] = value
+    elif cmd.startswith("edit "):
+        cmd = cmd[5:]
+        key, value = cmd.split("=")
+        if key in values: values[key] = value
+        else:
+            if ask_ok("Key '{}' does not exists.\nYou want to add one".format(key)):
+                values[key] = value
+    return values
+
+
 def main(args: list) -> bool:
     """ Main function """
     values: dict = {
@@ -86,13 +126,12 @@ def main(args: list) -> bool:
     try: values, mandatory_args = parse_arguments_from_cl(args, mandatory_args, values)
     except TypeError: pass
     values = check_values(values, mandatory_args, templates_args)
-    print(colorFont.RED, "-"*100, colorFont.GREEN)
-    for key in values:
-        value = values[key]
-        spaces1 = 20 - len(key) - 3
-        spaces2 = 80 - len(value) - 1 
-        print("| "+key+" "*spaces1+"| "+value+" "*spaces2+"|")
-    print(colorFont.RED, "_"*100, colorFont.RESET)
+    print_values(values)
+    if not ask_ok("All keys and values ok?"):
+        while True:
+            values = edit_values(values)
+            print_values(values)
+            if not ask_ok("Something else is needed"): break
     return True
 
 
