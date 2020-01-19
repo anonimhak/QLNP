@@ -4,8 +4,8 @@
 
 
 # Import modules
-from os import name as osname, getcwd, listdir
-from sys import exit as sexit, argv
+from os import name as osname, getcwd, mkdir, listdir, path
+from sys import exit as sysexit, argv
 from subprocess import Popen, PIPE, STDOUT
 
 from colorama import Fore as colorFont, Back as colorBack
@@ -22,10 +22,10 @@ __BRANCH__: str = "Develop"
 
 
 
-def errexit(fatal: bool=False, string: str="Fatal error") -> bool:
+def error(string: str="Fatal error", entrance: bool=False) -> bool:
     """ Exit for error """
-    print(colorBack.RED+colorFore.GREEN+string)
-    if fatal: sexit(1)
+    print(colorBack.RED+colorFont.GREEN+string)
+    if entrance: sysexit(1)
     print(colorBack.RESET)
 
 
@@ -39,12 +39,12 @@ def parse_arguments_from_cl(args: list, mandatory_args: list, values: dict) -> t
             elif (arg == "-a" or arg == "--about"): pass
             elif (arg == "-v" or arg == "--version"): print(__VERSION__)
             elif (arg == "-b" or arg == "--branch"): print(__BRANCH__)
-            else: errexit(True, "Key '{}' not found. Input key '--help' for more info".format(arg))
+            else: error(True, "Key '{}' not found. Input key '--help' for more info".format(arg))
         elif len(arg.split("=")) == 2:
             key, value = arg.split("=")
             if value == "": mandatory_args.append(key)
             else: values[key] = value
-        else: errexit(True, "Key '{}' not found".format(key))
+        else: error(True, "Key '{}' not found".format(key))
         return (values, mandatory_args)
 
 
@@ -111,6 +111,20 @@ def edit_values(values: dict) -> dict:
     return values
 
 
+def move_template(directory: str, template: str) -> bool:
+    pass
+
+
+def create_project(values: dict) -> bool:
+    if not path.exists(values["path"]):
+        error("There is not '{}' path".format(values["path"]), False)
+    full_path = path.join(values["path"], values["name"])
+    try: mkdir(full_path)
+    except OSError as err: error(str(err)[11:], True)
+    try: move_template(full_path, values["template"])
+    except KeyError: pass
+
+
 def main(args: list) -> bool:
     """ Main function """
     values: dict = {
@@ -132,6 +146,7 @@ def main(args: list) -> bool:
             values = edit_values(values)
             print_values(values)
             if not ask_ok("Something else is needed"): break
+    create_project(values)
     return True
 
 
