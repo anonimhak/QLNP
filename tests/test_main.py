@@ -13,7 +13,17 @@ def test__parse_arguments_from_cl():
         ["name=TeSt", "templates=", "scripts=gitinit.yaml"],
         ["name"],
         {"path": "."}
-    ) = (
-        {"path": ".", "name": "TeSt", "scripts": "gitinit.yaml"},
+    ) == (
+        {"path": ".", "name": "TeSt"},
         ["name", "templates"]
     )
+
+def t_parse():
+    v, m = parse_arguments_from_cl(["main.py", "name=Hello"], ["name"], {"path": "."})
+    print(v)
+    print("-"*50)
+    print(m)
+
+if __name__ == "__mian__":
+    t_parse()
+
